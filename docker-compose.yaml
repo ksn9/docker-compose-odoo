@@ -1,0 +1,42 @@
+services:
+  odoo-latest:
+    image: odoo:latest       
+    container_name: odoo-latest
+    depends_on:
+      - db-postgres
+    ports:
+      - "8069:8069"
+    volumes:
+      -  type: bind
+         source: "./web-data"
+         target: "/var/lib/odoo"
+         read_only: false
+      # Mount konfigurasi Odoo
+      - "./config:/etc/odoo"
+      # Mount folder custom addons 
+      - "./custom-addons:/mnt/extra-addons"
+    environment:
+      - HOST=db-postgres
+      - USER=odoo
+      - PASSWORD=odoo
+    networks:
+      - network_odoo
+
+  db-postgres:
+    image: postgres:latest      
+    container_name: db-postgres
+    environment:
+      - POSTGRES_DB=postgres
+      - POSTGRES_USER=odoo
+      - POSTGRES_PASSWORD=odoo
+    volumes:
+      -  type: bind
+         source: "./db-data"
+         target: "/var/lib/postgresql/data"
+         read_only: false
+    networks:
+      - network_odoo
+networks:
+    network_odoo:
+      name: network_odoo
+      driver: bridge
